@@ -4,14 +4,14 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SignalOptConcurrencyThrottleSupport implements ConcurrencyThrottleSupportInterface
+public class ConcurrencyThrottleSupport implements ConcurrencyThrottleSupportInterface
 {
     private final int threadLimit;
     private int threadCount = 0;
     private final Lock lock = new ReentrantLock();
     private final Condition canAccess = lock.newCondition();
 
-    public SignalOptConcurrencyThrottleSupport(int threadLimit)
+    public ConcurrencyThrottleSupport(int threadLimit)
     {
         this.threadLimit = threadLimit;
     }
