@@ -1,0 +1,83 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+
+  schedule:
+    - cron: '0 7 * * *' # run at 7AM UTC ( = 2AM CST)
+
+jobs:
+  cortado-build-and-test:
+    timeout-minutes: 30
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macos-10.15]
+        include:
+          - os: ubuntu-18.04
+            Z3_ARCH: ubuntu-18.04
+          - os: macos-10.15
+            Z3_ARCH: osx-10.15.7
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: setup z3 env variables
+        run: |  # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+          Z3_VERSION=4.8.14 # TODO: Switch to 4.8.15 as in data used
+          Z3_DIR_NAME=z3-${Z3_VERSION}-x64-${{ matrix.Z3_ARCH }}
+          Z3_RELEASE_LINK=https://github.com/Z3Prover/z3/releases/download/z3-${Z3_VERSION}/${Z3_DIR_NAME}.zip
+          echo "Z3_VERSION=${Z3_VERSION}" >> $GITHUB_ENV
+          echo "Z3_DIR_NAME=${Z3_DIR_NAME}" >> $GITHUB_ENV
+          echo "Z3_RELEASE_LINK=${Z3_RELEASE_LINK}" >> $GITHUB_ENV
+      - name: download and unzip z3 release
+        run: |
+          cd $HOME
+          curl -O -L ${{ env.Z3_RELEASE_LINK }}
+          unzip ${{ env.Z3_DIR_NAME }}.zip
+          echo "Z3_PATH=${HOME}/${Z3_DIR_NAME}/bin" >> $GITHUB_ENV
+      - if: ${{ matrix.os == 'macos-10.15' }}
+        name: setup z3 release for macos dynamic loading
+        # see https://github.com/Z3Prover/z3/issues/294#issuecomment-352472522 and
+        # http://thecourtsofchaos.com/2013/09/16/how-to-copy-and-relink-binaries-on-osx/
+        # Basically, we have to link libz3.dylib properly inside of libz3java.dylib
+        run: |
+          install_name_tool -change libz3.dylib  ${{ env.Z3_PATH }}/libz3.dylib ${{ env.Z3_PATH }}/libz3java.dylib
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+          java-package: jdk+fx  # make sure to get jdk with support for javafx https://github.com/actions/setup-java/pull/27
+
+      # as in https://docs.github.com/en/actions/guides/building-and-testing-java-with-maven
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: initialize and install cortado-core
+        run: |  # have to do the initialization in a separate command from the install.
+          mvn -B initialize --file cortado-core
+          mvn -B install -DskipTests=true --file cortado-core
+      - if: ${{ matrix.os == 'ubuntu-18.04' }}
+        name: run cortado-core tests (ubuntu)
+        run: |
+          export LD_LIBRARY_PATH=${{ env.Z3_PATH }}
+          echo $LD_LIBRARY_PATH
+          mvn -B test --file cortado-core
+      - if: ${{ matrix.os == 'macos-10.15' }}
+        name: run cortado-core tests (macos)
+        run: |
+          mvn -DargLine="-Djava.library.path=${{ env.Z3_PATH }}" -B -X test --file cortado-core
+          
+      - if: ${{ success() || failure() }}  # build benchmarks even if tests fail
+        name: install cortado-benchmarks
+        run: |   # MUST set LD_LIBRARY_PATH for this to work on ubuntu. Also set PATH_TO_Z3 as requested by cortado-example-monitor-impls
+          export LD_LIBRARY_PATH=${{ env.Z3_PATH }}
+          export PATH_TO_Z3=${{ env.Z3_PATH }}
+          mvn -B install --file cortado-benchmarks
