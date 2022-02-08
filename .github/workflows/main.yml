@@ -18,10 +18,10 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-18.04, macos-10.15]
+        os: [ubuntu-18.04, macos-10.16]
         include:
           - os: ubuntu-18.04
-            Z3_ARCH: glibc
+            Z3_ARCH: glibc-2.31
           - os: macos-10.16
             Z3_ARCH: osx-10.16
 
