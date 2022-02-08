@@ -22,7 +22,7 @@ jobs:
         include:
           - os: ubuntu-18.04
             Z3_ARCH: glibc-2.31
-          - os: macos-10.16
+          - os: macos-10.15
             Z3_ARCH: osx-10.16
 
     steps:
