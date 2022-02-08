@@ -6,7 +6,7 @@ name: Java CI with Maven
 on:
 
   schedule:
-    - cron: '0 7 * * *' # run at 7AM UTC ( = 2AM CST)
+    - cron: '48 4 * * *' # run at 7AM UTC ( = 2AM CST)
 
 jobs:
   cortado-build-and-test:
