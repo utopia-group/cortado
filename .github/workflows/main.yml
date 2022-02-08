@@ -21,9 +21,9 @@ jobs:
         os: [ubuntu-18.04, macos-10.15]
         include:
           - os: ubuntu-18.04
-            Z3_ARCH: ubuntu-18.04
-          - os: macos-10.15
-            Z3_ARCH: osx-10.15.7
+            Z3_ARCH: glibc
+          - os: macos-10.16
+            Z3_ARCH: osx-10.16
 
     steps:
       - uses: actions/checkout@v2
