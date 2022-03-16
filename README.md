@@ -53,7 +53,29 @@ The command `install_name_tool` can be installed through your preferred package 
 
 #### Command Line Interface
 
-TODO
+Since Cortado is based on [Soot](http://soot-oss.github.io/soot/), our tool expects the implicit monitor as a compiled class file. 
+To see how you can generate such a class, consult [this sample implicit monitor](https://github.com/utopia-group/cortado/blob/main/cortado-benchmarks/cortado-benchmark-implementations/src/main/java/edu/utexas/cs/utopia/cortado/githubbenchmarks/org/springframework/util/ImplicitConcurrencyThrottleSupport.java).
+To convert an implicit monitor to an explicit one, you can simply run the following command:
+
+```bash
+java -jar cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar class-file.txt [tool options] -- [soot options]
+```
+
+*Important Note:* If you are running Cortado on MacOS, you need to launch the VM as follows.
+
+```bash
+java -Djava.library.path=path/to/Z3/dir/bin/ -jar cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar class-file.txt [tool options] -- [soot options]
+```
+
+Here, `class-file.txt` is a text file containing the class names of all implicit monitors to be converted. 
+For a complete list of available options, you can simply run `java -jar cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar --help`. 
+All arguments have a default option, so the tool can be run without any additional arguments. 
+Arguments following the `--` delimiter can be used to configure Soot, a complete list of Soot options can be found [here](https://soot-oss.github.io/soot/docs/4.3.0-SNAPSHOT/options/soot_options.html).
+
+TODO: Reference a sample `class-file.txt`, once we add the benchmark harnesses.
+
+TODO: Reference the pom.xml that contains the run configuration for the benchmarks.
+
 
 ## Benchmarks
 Benchmarks used for our 2022 OOPSLA submission.
@@ -62,10 +84,10 @@ To compile them, please follow the following instructions.
 
 ### Compiling benchmarks
 
-Build and install the package using the [Maven](https://maven.apache.org)
-build system.
+You can build the benchmarks using the following command:
+
 ```bash
-mvn clean install -f cortado-core
 mvn clean isntall -f cortado-benchmarks
 ```
 
+TODO: add commands for compiling harnesses and run benchmarks.
