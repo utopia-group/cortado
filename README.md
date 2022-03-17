@@ -84,10 +84,23 @@ To compile them, please follow the following instructions.
 
 ### Compiling benchmarks
 
-You can build the benchmarks using the following command:
+After installing cortado, you can compile the benchmarks and run
+the cortado algorithm on them using the following command:
 
 ```bash
-mvn clean isntall -f cortado-benchmarks
+mvn clean install -f cortado-benchmarks
 ```
 
+To simply compile the benchmarks without running the cortado algorithm,
+run:
+
+```bash
+mvn clean install -f cortado-benchmarks -Dexec.skip=true
+```
+
+Note that you still must install cortado first due to a dependency on
+the `@Atomic` annotations.
+
 TODO: add commands for compiling harnesses and run benchmarks.
+
+TODO: Add link to `@Atomic`
