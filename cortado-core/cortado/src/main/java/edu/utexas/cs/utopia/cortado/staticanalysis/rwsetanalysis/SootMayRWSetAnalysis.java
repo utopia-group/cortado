@@ -396,16 +396,6 @@ public class SootMayRWSetAnalysis implements MayRWSetAnalysis
             }
          }
 
-        // FIXME: FIX CONTEXT SENSITIVITY ISSUE WITH WSDATALISTENER
-        // recompute transitive targets if stale
-//        if(callGraphListener.hasNext())
-//        {
-//            computeMtrTransTrgs();
-//        }
-//        assert !callGraphListener.hasNext();
-
-        // FIXME: FIX CONTEXT SENSITIVE ISSUE WITH WSDATALISTENER
-//        Iterator<MethodOrMethodContext> trgs = mtrTransTrgs.iterator(MethodContext.v(inMethod, u));
         Iterator<MethodOrMethodContext> trgs = mtrTransTrgs.iterator(u);
 
         while (trgs.hasNext())

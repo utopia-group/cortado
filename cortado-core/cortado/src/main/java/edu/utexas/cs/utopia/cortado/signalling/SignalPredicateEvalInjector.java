@@ -120,8 +120,6 @@ public class SignalPredicateEvalInjector extends BodyTransformer
 
         if (Scene.v().hasPointsToAnalysis())
         {
-            // TODO: FIX CONTEXT SENSITIVITY ISSUE IN WSDATALISTENER
-//            final MethodOrMethodContext callingContext = MethodContext.v(body.getMethod(), evalStmt);
             final SootMethod callingContext = body.getMethod();
             Edge guardInvkEdge = new Edge(callingContext, evalStmt, predicateMethod);
             Scene.v().getCallGraph().addEdge(guardInvkEdge);

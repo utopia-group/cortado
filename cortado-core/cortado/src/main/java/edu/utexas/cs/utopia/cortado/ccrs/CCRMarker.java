@@ -114,8 +114,6 @@ public class CCRMarker extends BodyTransformer
         // update call graph if present
         if(Scene.v().hasCallGraph())
         {
-            // TODO: FIX CONTEXT SENSITIVITY ISSUE IN WSDATALISTENER
-//            final MethodOrMethodContext callingContext = MethodContext.v(ccr.getAtomicSection(), evaluateGuard);
             final SootMethod callingContext = ccr.getAtomicSection();
             final Edge guardInvkEdge = new Edge(callingContext, evaluateGuard, ccr.getGuard());
             Scene.v().getCallGraph().addEdge(guardInvkEdge);
