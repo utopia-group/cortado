@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>edu.utexas.cs.utopia.cortado</groupId>
+    <artifactId>cortado-core</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>cortado</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>cortado</name>
+  <description>Automated implicit monitor implementation.</description>
+  <url>http://www.github.com/utopia-group/cortado</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <!-- Dependencies -->
+  <dependencies>
+  	<!-- Unit Testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.9</version>
+      <scope>test</scope>
+  </dependency>
+
+    <!-- Cortado mock classes -->
+    <dependency>
+        <groupId>edu.utexas.cs.utopia.cortado</groupId>
+        <artifactId>cortado-mockclasses</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    
+    <!-- Soot -->
+    <dependency>
+	  <groupId>org.soot-oss</groupId>
+	  <artifactId>soot</artifactId>
+	  <version>4.2.1</version>
+	</dependency> 
+    
+    <!-- Used to import z3 java bindings library -->
+	<dependency>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-install-plugin</artifactId>
+	  <version>3.0.0-M1</version>
+	  <type>maven-plugin</type>
+	</dependency>
+	
+	<!-- Z3 Java bindings -->
+    <!-- installed from jar in lib/ -->
+	<dependency>
+        <groupId>com.microsoft</groupId>
+        <artifactId>z3</artifactId>
+        <version>1.0</version>
+    </dependency>
+
+    <!-- partial maxSAT using sat4j https://www.sat4j.org/ -->
+    <!-- installed from jar in lib/ -->
+      <dependency>
+          <groupId>org.sat4j</groupId>
+          <artifactId>org.sat4j.maxsat</artifactId>
+          <version>1.0</version>
+      </dependency>
+    
+    <!-- Google standard libraries (for graph utils mostly) -->
+    <dependency>
+    	<groupId>com.google.guava</groupId>
+    	<artifactId>guava</artifactId>
+    	<version>30.0-jre</version>
+    </dependency>
+    
+    <!-- simple logging 4 java api -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.25</version>
+    </dependency>
+    
+    <!-- simple logger implementation of slf4j -->
+     <dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-simple</artifactId>
+		<version>1.7.5</version>
+	</dependency>
+
+    <!-- antlr -->
+    <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4</artifactId>
+        <version>4.9</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>4.9</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+  	<!-- Plugins -->
+  	<plugins>
+  		<plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>3.0.0-M1</version>
+          <executions>
+              <!-- Link to Z3 java bindings during "install-file" phase -->
+              <execution>
+                  <id>z3</id>
+                  <phase>initialize</phase>
+                  <goals>
+                      <goal>install-file</goal>
+                  </goals>
+                  <configuration>
+                      <groupId>com.microsoft</groupId>
+                      <artifactId>z3</artifactId>
+                      <version>1.0</version>
+                      <packaging>jar</packaging>
+                      <file>${project.basedir}/../../lib/com.microsoft.z3.jar</file>
+                  </configuration>
+              </execution>
+              <execution>
+                  <id>sat4j</id>
+                  <phase>initialize</phase>
+                  <goals>
+                      <goal>install-file</goal>
+                  </goals>
+                  <configuration>
+                      <groupId>org.sat4j</groupId>
+                      <artifactId>org.sat4j.maxsat</artifactId>
+                      <version>1.0</version>
+                      <packaging>jar</packaging>
+                      <file>${project.basedir}/../../lib/sat4j-maxsat.jar</file>
+                  </configuration>
+              </execution>
+          </executions>
+        </plugin>
+        <!-- Make sure we compile with Java8 -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>8</source>
+                <target>8</target>
+            </configuration>
+        </plugin>
+        <!-- Shade plugin: build all deps into one massive jar -->
+        <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-shade-plugin</artifactId>
+	        <version>3.2.4</version>
+	        <executions>
+	            <execution>
+	                <phase>package</phase>
+	                <goals>
+	                    <goal>shade</goal>
+	                </goals>
+	                <configuration>
+	                    <transformers>
+	                        <transformer
+	                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+	                            <manifestEntries>
+	                                <Main-Class>edu.utexas.cs.utopia.cortado.Driver</Main-Class>
+	                            </manifestEntries>
+	                        </transformer>
+	                    </transformers>
+	                    <filters>
+		                    <filter>
+	                            <artifact>*:*</artifact>
+		                    	<excludes>
+		                    		<exclude>module-info.class</exclude>
+                                    <exclude>META-INF/**</exclude>
+                                    <exclude>LICENSE.txt</exclude>
+		                    	</excludes>
+		                    </filter>
+	                    </filters>
+	                </configuration>
+	            </execution>
+	        </executions>
+        </plugin>
+
+        <plugin>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.9</version>
+            <executions>
+                <execution>
+                    <id>antlr</id>
+                    <configuration>
+                        <outputDirectory>${basedir}/src/main/java/</outputDirectory>
+                        <visitor>true</visitor>
+                    </configuration>
+                    <goals>
+                        <goal>antlr4</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+  
+    <!-- Plugin Management -->
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!-- Eclipse-generated plugins to avoid Maven defaults -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      
+        <!-- Make sure Eclipse knows about install-file phase for linking Z3 bindings -->
+        <!-- Only effects eclipse maven build -->
+    	  <plugin>
+	    <groupId>org.eclipse.m2e</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+	    <version>1.0.0</version>
+  	    <configuration>
+          <lifecycleMappingMetadata>
+            <pluginExecutions>
+              <pluginExecution>
+                <pluginExecutionFilter>
+                   <groupId>org.apache.maven.plugins</groupId>
+                   <artifactId>maven-install-plugin</artifactId>
+                   <versionRange>[3.0.0-M1,)</versionRange>
+                   <goals>
+                     <goal>install-file</goal>
+                   </goals>
+                 </pluginExecutionFilter>
+                 <action>
+                   <execute>
+                      <runOnIncremental>false</runOnIncremental>
+                   </execute >
+                 </action>
+               </pluginExecution>
+             </pluginExecutions>
+           </lifecycleMappingMetadata>
+         </configuration>
+         </plugin>
+       </plugins>
+    </pluginManagement>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>3.0.0</version>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>

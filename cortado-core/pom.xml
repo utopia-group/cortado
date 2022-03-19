@@ -9,5 +9,6 @@
 
   <modules>
     <module>cortado-mockclasses</module>
+    <module>cortado</module>
   </modules>
 </project>
