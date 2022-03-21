@@ -58,17 +58,17 @@ To see how you can generate such a class, consult [this sample implicit monitor]
 To convert an implicit monitor to an explicit one, you can simply run the following command:
 
 ```bash
-java -jar cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar class-file.txt [tool options] -- [soot options]
+java -jar cortado-core/cortado/target/cortado-0.1.0.jar class-file.txt [tool options] -- [soot options]
 ```
 
 *Important Note:* If you are running Cortado on MacOS, you need to launch the VM as follows.
 
 ```bash
-java -Djava.library.path=path/to/Z3/dir/bin/ -jar cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar class-file.txt [tool options] -- [soot options]
+java -Djava.library.path=path/to/Z3/dir/bin/ -jar cortado-core/cortado/target/cortado-0.1.0.jar class-file.txt [tool options] -- [soot options]
 ```
 
 Here, `class-file.txt` is a text file containing the class names of all implicit monitors to be converted. 
-For a complete list of available options, you can simply run `java -jar cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar --help`. 
+For a complete list of available options, you can simply run `java -jar cortado-core/cortado/target/cortado-0.1.0.jar --help`. 
 All arguments have a default option, so the tool can be run without any additional arguments. 
 Arguments following the `--` delimiter can be used to configure Soot, a complete list of Soot options can be found [here](https://soot-oss.github.io/soot/docs/4.3.0-SNAPSHOT/options/soot_options.html).
 

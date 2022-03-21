@@ -7,13 +7,12 @@
   <parent>
     <groupId>edu.utexas.cs.utopia.cortado</groupId>
     <artifactId>cortado-core</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
   </parent>
   <artifactId>cortado-mockclasses</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
 
   <name>cortado-mockclasses</name>
-  <!-- FIXME change it to the project's website -->
   <url>https://github.com/utopia-group/cortado</url>
 
   <properties>
