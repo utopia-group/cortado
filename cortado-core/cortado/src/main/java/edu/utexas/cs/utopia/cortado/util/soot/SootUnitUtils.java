@@ -165,12 +165,6 @@ public class SootUnitUtils
             throw new IllegalArgumentException("some exit unit is not contained in inMethod's active body.");
         }
 
-        //TODO: figure out what's the proper check here. Our current partitioner is based on SCCs, so we are fine.
-//        final DominatorTree<Unit> pdomTree = PostDominatorTreeCache.getInstance().getOrCompute(inMethod);
-//        if(!exitUnits.stream().allMatch(exit -> pdomTree.isDominatorOf(pdomTree.getDode(exit), pdomTree.getDode(start))))
-//        {
-//            throw new IllegalArgumentException("some exit unit does not post-dominate start unit " + start);
-//        }
         // DFS from start, to build visited
         final ImmutableGraph<Unit> cfg = GuavaExceptionalUnitGraphCache.getInstance().getOrCompute(inMethod);
         StronglyConnectedComponents<Unit> unitSCCs = new StronglyConnectedComponents<>(cfg);
