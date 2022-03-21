@@ -56,10 +56,7 @@ class CmdLine
     private long maxSatTimeoutInMs = TimeUnit.SECONDS.toMillis(20);
     private long expressoSMTDefaultTimeoutInMs = TimeUnit.MINUTES.toMillis(10);
     private long cortadoSMTDefaultTimeoutInMs = TimeUnit.SECONDS.toMillis(15);
-    // lock enumeration
-    private boolean enumerateLockings = false;
-    private long lockingEnumerationTimeoutInMs = TimeUnit.SECONDS.toMillis(10);
-    private String enumerationOutputDir = null;
+
     private String ignoreListsDir = "ignore-lists/";
     private String modelsDir = "models/";
 
@@ -92,12 +89,6 @@ class CmdLine
                 "--fragmentweights method      Use the specified method to put weights on fragments\n" +
                 "                              (default) par-op -- Heuristic based on parallelization opportunities\n" +
                 "                                        uniform -- Weight fragments uniformly\n" +
-                "--countlockings timeout units               Count the number of lockings.\n" +
-                "                                            timeout should be a positive integer\n" +
-                "                                            indicating how much time each solve is allowed run.\n" +
-                "                                            units specifies the time unit (see TIME UNITS below)\n" +
-                "--writeenumeratedlockings dir               Write out the enumerated lockings to directory dir.\n" +
-                "                                            --countlockings must also be passed as an argument.\n" +
                 "--expressosmttimeout time units   Set the specified timeout as a default for SMT timeouts.\n" +
                 "                                  During the Expresso algorithm\n" +
                 "                                  Default is 30 minutes.\n" +
@@ -236,26 +227,6 @@ class CmdLine
                     }
                     ++i;
                     break;
-                case "--countlockings":
-                    this.enumerateLockings = true;
-                    // read the time
-                    try {
-                        this.lockingEnumerationTimeoutInMs = parseTimeArg(args, i);
-                    } catch(IllegalArgumentException e)
-                    {
-                        parseError = e.getMessage();
-                        break parseLoop;
-                    }
-                    i += 3;
-                    break;
-                case "--writeenumeratedlockings":
-                    if(++i >= args.length) {
-                        parseError = "--writeenumeratedlockings option missing output directory";
-                        break parseLoop;
-                    }
-                    enumerationOutputDir = args[i];
-                    ++i;
-                    break;
                 case "--expressosmttimeout":
                     try {
                         this.expressoSMTDefaultTimeoutInMs = parseTimeArg(args, i);
@@ -324,13 +295,6 @@ class CmdLine
                     parseError = "Invalid option: " + args[i];
                     break parseLoop;
             }
-        }
-
-        // make sure writeEnumeratedLockings is only on if --countlockings
-        // was also passed
-        if(enumerationOutputDir != null && !enumerateLockings)
-        {
-            parseError = "--writeenumeratedlockings passed without --countlockings";
         }
 
         return parseError;
@@ -484,28 +448,6 @@ class CmdLine
     }
 
     /**
-     * @return true iff we should enumerate lockings
-     */
-    public boolean isEnumerateLockingsEnabled()
-    {
-        return enumerateLockings;
-    }
-
-    /**
-     * @return the directory to write enumerate lockings to. Try to create it if it does not exist.
-     * @throws IOException if tries to create directory and fails
-     */
-    @Nullable
-    public String getEnumerationOutputDir() throws IOException
-    {
-        if(enumerationOutputDir != null)
-        {
-            makeDirIfDoesNotExist(enumerationOutputDir);
-        }
-        return enumerationOutputDir;
-    }
-
-    /**
      * @return the timeout for the weight-max sat problem in milliseconds
      */
     public long getMaxSatTimeoutInMs()
@@ -569,14 +511,6 @@ class CmdLine
         globalProfiler.recordRunInfo("z3Version", com.microsoft.z3.Version.getFullVersion());
         globalProfiler.recordRunInfo("fragmentConstructor", getFragmentConstructor());
         globalProfiler.recordRunInfo("fragmentWeightMethod", getFragmentWeightMethod());
-    }
-
-    /**
-     * @return the timeout in milliseconds for each solve during locking enumeration
-     */
-    public long getLockingEnumerationTimeoutInMs()
-    {
-        return lockingEnumerationTimeoutInMs;
     }
 
     @Nonnull

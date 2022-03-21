@@ -17,11 +17,8 @@ import edu.utexas.cs.utopia.cortado.staticanalysis.singletons.CachedMayRWSetAnal
 import edu.utexas.cs.utopia.cortado.util.graph.GuavaExceptionalUnitGraphCache;
 import edu.utexas.cs.utopia.cortado.util.logging.CortadoMonitorProfiler;
 import edu.utexas.cs.utopia.cortado.util.logging.CortadoProfiler;
-import edu.utexas.cs.utopia.cortado.util.sat.enumeration.WeightedPartialMaxSatEnumeratorFactory;
-import edu.utexas.cs.utopia.cortado.util.sat.enumeration.Z3WeightedPartialMaxSatEnumeratorFactory;
 import edu.utexas.cs.utopia.cortado.util.sat.maxsat.MaxSatSolverFailException;
 import edu.utexas.cs.utopia.cortado.util.sat.maxsat.WeightedPartialMaxSatSolverFactory;
-import edu.utexas.cs.utopia.cortado.util.sat.maxsat.Z3WeightedPartialMaxSatSolverFactory;
 import edu.utexas.cs.utopia.cortado.util.soot.*;
 import edu.utexas.cs.utopia.cortado.util.soot.atomics.PotentialAtomicField;
 import edu.utexas.cs.utopia.cortado.vcgen.*;
@@ -126,10 +123,6 @@ public class Driver
         cmdLine.recordRunInfoToGlobalProfiler();
         cortadoProfiler.startCortado();
 
-        // we'll use this to record the number of lockings, if it is
-        // counted. className -> list, list[i] = # of lockings using i locks
-        Map<String, List<Integer>> monitorToNumLockings = cmdLine.isEnumerateLockingsEnabled() ? new HashMap<>() : null;
-
         // set the default flip-predicate optimization
         switch(cmdLine.getFlipPredSigOpt())
         {
@@ -154,7 +147,7 @@ public class Driver
             System.out.println("Beginning to run cortado on "
                     + targetClassName + " at "
                     + dateTimeFormatter.format(ZonedDateTime.now(centralTimeZone)));
-            runCortado(cmdLine, targetClassName, sootOptions, cmdLineOutFormat, monitorToNumLockings);
+            runCortado(cmdLine, targetClassName, sootOptions, cmdLineOutFormat);
             System.out.println("cortado completed on class "
                     + targetClassName + " at "
                     + dateTimeFormatter.format(ZonedDateTime.now(centralTimeZone)));
@@ -164,34 +157,6 @@ public class Driver
         // write profiling info
         cortadoProfiler.writeToCSV("target", "cortado-profiling");
 
-        // If counted number of solutions, record those
-        if(cmdLine.isEnumerateLockingsEnabled())
-        {
-            // get a writer to the csv
-            String fileName = Paths.get("target", "num-lockings.csv").toString();
-            final FileWriter fileWriter = new FileWriter(fileName);
-            final BufferedWriter csvWriter = new BufferedWriter(fileWriter);
-            /// write out the data
-            assert monitorToNumLockings != null;
-            csvWriter.write("monitor,numLocks,numSolutions\n");
-            // for each monitor
-            for (Map.Entry<String, List<Integer>> entry : monitorToNumLockings.entrySet())
-            {
-                final String monitorName = entry.getKey();
-                final List<Integer> lockingCounts = entry.getValue();
-                // for each # of locks for which we computed num solutions:
-                for (int index = 0; index < lockingCounts.size(); ++index)
-                {
-                    int numLocks = index + 1;
-                    // write the data
-                    final int numSols = lockingCounts.get(index);
-                    final String csvLine = String.format("%s,%s,%s\n", monitorName, numLocks, numSols);
-                    csvWriter.write(csvLine);
-                }
-            }
-            // close the writer
-            csvWriter.close();
-        }
     }
 
     /**
@@ -200,8 +165,7 @@ public class Driver
     private static void runCortado(@Nonnull CmdLine cmdLine,
                                    @Nonnull String targetClassName,
                                    @Nonnull String[] sootOptions,
-                                   int cmdLineOutFormat,
-                                   @Nullable Map<String, List<Integer>> monitorToNumLockings)
+                                   int cmdLineOutFormat)
             throws IOException, MaxSatSolverFailException
     {
         final CortadoProfiler cortadoGlobalProfiler = CortadoProfiler.getGlobalProfiler();
@@ -374,38 +338,6 @@ public class Driver
                 signalInferenceResults.getPreChecks()
         );
 
-        // Count number of lockings, if requested
-        List<ImmutableLockAssignment> enumeratedLockings = null;
-        if(cmdLine.isEnumerateLockingsEnabled())
-        {
-            log.debug("Beginning enumeration for " + targetClassName);
-            monitorProfiler.pushEvent("enumeration");
-            assert monitorToNumLockings != null;
-            WeightedPartialMaxSatEnumeratorFactory wpmseFactory = new Z3WeightedPartialMaxSatEnumeratorFactory();
-            WeightedPartialMaxSatSolverFactory wpmsFactory = new Z3WeightedPartialMaxSatSolverFactory();
-            final LockAssignmentMaxSatEnumerator enumerator = new LockAssignmentMaxSatEnumerator(wpmseFactory,
-                    wpmsFactory,
-                    lockAssignmentChecker,
-                    signalInferenceResults.getPreChecks(),
-                    fragmentWeightStrategy);
-            final long enumTimeoutInMS = cmdLine.getLockingEnumerationTimeoutInMs();
-            final long solveTimeoutInMS = cmdLine.getMaxSatTimeoutInMs();
-            enumeratedLockings = enumerator.enumerateLockings(enumTimeoutInMS, solveTimeoutInMS);
-            final List<Integer> numberOfLockingsGroupedByNumLocksUsed = enumeratedLockings.stream()
-                    .collect(Collectors.groupingBy(
-                            LockAssignment::numLocks,
-                            Collectors.counting()
-                    )).entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .map(Map.Entry::getValue)
-                    .map(Long::intValue)
-                    .collect(Collectors.toList());
-            monitorToNumLockings.put(targetClassName, numberOfLockingsGroupedByNumLocksUsed);
-            log.debug("enumeration complete for " + targetClassName);
-            monitorProfiler.popEvent();
-        }
-
         ImmutableLockAssignment lockAssignment = solveMaxSatForLockAssignment(targetClassName,
                 lockAssignmentChecker,
                 signalInferenceResults.getPreChecks(),
@@ -436,19 +368,6 @@ public class Driver
                 signalInferenceResults,
                 ablatedLockAssignment,
                 explicitMonitorWriter);
-
-        // implement any enumerated assignments
-        if(enumeratedLockings != null && cmdLine.getEnumerationOutputDir() != null)
-        {
-            for(int i = 0; i < enumeratedLockings.size(); ++i)
-            {
-                implementAsReplica(fragmentedMonitor,
-                        targetClassName + "Enumerated" + i,
-                        signalInferenceResults,
-                        enumeratedLockings.get(i),
-                        explicitMonitorWriter);
-            }
-        }
 
         // implement the explicit monitor (insert locks and signals)
         explicitMonitorWriter.implementExplicitMonitor(fragmentedMonitor,
