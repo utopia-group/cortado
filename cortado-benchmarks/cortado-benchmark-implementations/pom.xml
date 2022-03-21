@@ -4,10 +4,10 @@
     <parent>
         <artifactId>cortado-benchmarks</artifactId>
         <groupId>edu.utexas.cs.utopia.cortado</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
     <artifactId>cortado-benchmark-implementations</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>edu.utexas.cs.utopia.cortado</groupId>
             <artifactId>cortado-mockclasses</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
         <!-- General guava -->
