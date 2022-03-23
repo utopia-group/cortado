@@ -67,15 +67,10 @@ java -jar cortado-core/cortado/target/cortado-0.1.0.jar class-file.txt [tool opt
 java -Djava.library.path=path/to/Z3/dir/bin/ -jar cortado-core/cortado/target/cortado-0.1.0.jar class-file.txt [tool options] -- [soot options]
 ```
 
-Here, `class-file.txt` is a text file containing the class names of all implicit monitors to be converted. 
+Here, `class-file.txt` is a text file containing the class names of all implicit monitors to be converted. For an example of such a file, please see [here](https://github.com/utopia-group/cortado/blob/main/cortado-benchmarks/cortado-benchmark-implementations/all-example-monitors.txt).
 For a complete list of available options, you can simply run `java -jar cortado-core/cortado/target/cortado-0.1.0.jar --help`. 
 All arguments have a default option, so the tool can be run without any additional arguments. 
-Arguments following the `--` delimiter can be used to configure Soot, a complete list of Soot options can be found [here](https://soot-oss.github.io/soot/docs/4.3.0-SNAPSHOT/options/soot_options.html).
-
-TODO: Reference a sample `class-file.txt`, once we add the benchmark harnesses.
-
-TODO: Reference the pom.xml that contains the run configuration for the benchmarks.
-
+Arguments following the `--` delimiter can be used to configure Soot, a complete list of Soot options can be found [here](https://soot-oss.github.io/soot/docs/4.3.0-SNAPSHOT/options/soot_options.html). A typical configuration of Cortado can be found [here](https://github.com/utopia-group/cortado/blob/main/cortado-benchmarks/cortado-benchmark-implementations/pom.xml#L386-L478).
 
 ## Benchmarks
 Benchmarks used for our 2022 OOPSLA submission.
@@ -88,7 +83,7 @@ After installing cortado, you can compile the benchmarks and run
 the cortado algorithm on them using the following command:
 
 ```bash
-mvn clean install -f cortado-benchmarks
+mvn clean install -f cortado-benchmarks -Dsolver.exec=/path/to/z3/executable
 ```
 
 To simply compile the benchmarks without running the cortado algorithm,
