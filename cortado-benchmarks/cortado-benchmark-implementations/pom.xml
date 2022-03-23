@@ -8,6 +8,7 @@
     </parent>
     <artifactId>cortado-benchmark-implementations</artifactId>
     <version>0.1.0</version>
+    <name>cortado-benchmark-implementations</name>
     <modelVersion>4.0.0</modelVersion>
 
         <properties>

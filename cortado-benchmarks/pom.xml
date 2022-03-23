@@ -9,6 +9,7 @@
 
     <modules>
         <module>cortado-benchmark-implementations</module>
+        <module>cortado-benchmark-harnesses</module>
     </modules>
 
     <dependencyManagement>
