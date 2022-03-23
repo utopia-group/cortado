@@ -185,7 +185,7 @@
         <dependency>
             <groupId>edu.utexas.cs.utopia.cortado</groupId>
             <artifactId>cortado-mockclasses</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
         <!-- gradle -->
@@ -403,7 +403,7 @@
                             <argument>-Dsolver.exec=${solver.exec}</argument>
                             <!-- run jar on monitors -->
                             <argument>-jar</argument>
-                            <argument>../../cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar</argument>
+                            <argument>../../cortado-core/cortado/target/cortado-0.1.0.jar</argument>
                             <argument>all-example-monitors.txt</argument>
                             <!-- perform flip-pred sig opt? -->
                             <argument>--flip-pred-sig-opt</argument>
