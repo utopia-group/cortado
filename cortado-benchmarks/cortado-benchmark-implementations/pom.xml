@@ -10,8 +10,32 @@
     <version>0.1.0</version>
     <modelVersion>4.0.0</modelVersion>
 
-    <properties>
+        <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <!-- Define these as empty properties unless set up by the appropriate profile -->
+        <suspend.cortado.for.debug.client/>
+        <dot.files.option/>
+        <dot.files.directory/>
+        <enumerate.locks.arg/>
+        <enumerate.locks.timeout/>
+        <enumerate.locks.timeout.units/>
+        <enumerate.locks.dir.arg/>
+        <enumerate.locks.dir/>
+        <jmx.remote.port/>
+        <jmx.ssl/>
+        <jmx.authenticate/>
+        <!-- default values -->
+        <debug.port>8000</debug.port>
+        <!--suppress UnresolvedMavenProperty -->
+        <solver.exec>${env.Z3_SOLVER_EXEC}</solver.exec>
+        <log.level>debug</log.level>
+        <enable.assertions>-enableassertions</enable.assertions>
+        <fork.join.pool.limit/>
+        <fork.join.pool.limit.arg/>
+        <fragment.weights>par-op</fragment.weights>
+        <fragment.constructor>pt-based</fragment.constructor>
     </properties>
 
     <repositories>
@@ -29,12 +53,147 @@
         </repository>
     </repositories>
 
+    <profiles>
+        <!-- debug inside the maven exec:exec jvm -->
+        <profile>
+            <id>debug.cortado</id>
+            <!-- Activate if maven property debug.cortado is defined true -->
+            <activation>
+                <property>
+                    <name>debug.cortado</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <suspend.cortado.for.debug.client>
+                    -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=${debug.port}
+                </suspend.cortado.for.debug.client>
+            </properties>
+        </profile>
+        <profile>
+            <id>limit.parallelism</id>
+            <activation>
+                <property>
+                    <name>fork.join.pool.limit</name>
+                </property>
+            </activation>
+            <properties>
+                <fork.join.pool.limit.arg>-Djava.util.concurrent.ForkJoinPool.common.parallelism=${fork.join.pool.limit}</fork.join.pool.limit.arg>
+            </properties>
+        </profile>
+        <!-- release mode -->
+        <profile>
+            <id>release</id>
+            <!-- Activate if maven property release is defined true -->
+            <activation>
+                <property>
+                    <name>release</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <enable.assertions/>
+                <log.level>warn</log.level>
+            </properties>
+        </profile>
+        <!-- Make dot files if this profile is activated -->
+        <profile>
+            <id>make.dot</id>
+            <!-- Activate if maven property make.dot is defined true -->
+            <activation>
+                <property>
+                    <name>make.dot</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <dot.files.option>
+                    --fragpart2dot
+                </dot.files.option>
+                <dot.files.directory>
+                    target/dotFiles
+                </dot.files.directory>
+            </properties>
+        </profile>
+        <!-- enumerate lockings -->
+        <profile>
+            <id>enumerate.lockings</id>
+            <!-- Activate if maven property make.dot is defined true -->
+            <activation>
+                <property>
+                    <name>enumerate.lockings</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <!-- count solutions with a per-sol timeout of 10s and max-solve of 1,000 -->
+                <enumerate.locks.arg>--countlockings</enumerate.locks.arg>
+                <enumerate.locks.timeout>30</enumerate.locks.timeout>
+                <enumerate.locks.timeout.units>s</enumerate.locks.timeout.units>
+                <enumerate.locks.dir.arg>--writeenumeratedlockings</enumerate.locks.dir.arg>
+                <enumerate.locks.dir>target/enumerated-jimple</enumerate.locks.dir>
+            </properties>
+        </profile>
+        <!-- Make dot files if this profile is activated -->
+        <profile>
+            <id>use.jmx</id>
+            <!-- Activate if maven property use.jmx is defined true -->
+            <activation>
+                <property>
+                    <name>use.jmx</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <jmx.remote.port>-Dcom.sun.management.jmxremote.port=5005</jmx.remote.port>
+                <jmx.ssl>-Dcom.sun.management.jmxremote.ssl=false</jmx.ssl>
+                <jmx.authenticate>-Dcom.sun.management.jmxremote.authenticate=false</jmx.authenticate>
+            </properties>
+        </profile>
+        <profile>
+            <id>uniform.weights</id>
+            <activation>
+                <property>
+                    <name>uniform.weights</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <fragment.weights>uniform</fragment.weights>
+            </properties>
+        </profile>
+        <profile>
+            <id>statement.frags</id>
+            <activation>
+                <property>
+                    <name>statement.frags</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <fragment.constructor>statement</fragment.constructor>
+            </properties>
+        </profile>
+        <profile>
+            <id>ccr.frags</id>
+            <activation>
+                <property>
+                    <name>ccr.frags</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <fragment.constructor>ccr</fragment.constructor>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <!-- Unit testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
 
@@ -50,8 +209,21 @@
         <dependency>
             <groupId>edu.utexas.cs.utopia.cortado</groupId>
             <artifactId>cortado-mockclasses</artifactId>
-            <version>0.1.0</version>
+            <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- gradle -->
+        <!-- Needed for org.gradle.internal.concurrent -->
+        <dependency>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-base-services</artifactId>
+            <version>6.0</version>
+        </dependency>
+        <!-- Needed for org.gradle.internal.dispatch.AsyncDispatch/Dispatch -->
+        <dependency>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-messaging</artifactId>
+            <version>6.0</version>
         </dependency>
         <!-- General guava -->
         <dependency>
@@ -59,12 +231,31 @@
             <artifactId>guava</artifactId>
             <version>30.0-jre</version>
         </dependency>
+        <!-- Needed for org.gradle.util.BulkInputStream -->
+        <dependency>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-core</artifactId>
+            <version>6.1.1</version>
+        </dependency>
         <!-- Ericsson research for WSListener -->
         <!-- https://mvnrepository.com/artifact/com.ericsson.research.trap.tests/trap-tests-multiple-transports -->
         <dependency>
             <groupId>com.ericsson.research.trap.tests</groupId>
             <artifactId>trap-tests-multiple-transports</artifactId>
             <version>1.4.2</version>
+        </dependency>
+        <!-- hadoop client (for MergeThread) -->
+        <!-- (also needs slf4j, zookeeper, findbugs, gson) -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <!-- hive and spark (for Remote Driver) -->
+        <dependency>
+            <groupId>org.apache.hive</groupId>
+            <artifactId>hive-common</artifactId>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -77,6 +268,7 @@
             <artifactId>spark-client</artifactId>
             <version>2.3.9</version>
         </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -87,17 +279,26 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.5</version>
         </dependency>
-        <!-- necessary for RealmThreadPoolExecutor -->
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
             <version>3.5.6</version>
         </dependency>
-        <!-- necessary for RealmThreadPoolExecutor -->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>annotations</artifactId>
             <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        <!-- alibaba nacos -->
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+            <version>1.4.1</version>
         </dependency>
     </dependencies>
 
@@ -113,7 +314,205 @@
                 <target>8</target>
             </configuration>
         </plugin>
-
+        <!-- don't delete -inv.txt files -->
+        <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+                <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                <filesets>
+                    <fileset>
+                        <directory>target/</directory>
+                        <excludes>
+                            <exclude>**/*-inv.txt</exclude>
+                        </excludes>
+                    </fileset>
+                </filesets>
+            </configuration>
+        </plugin>
+        <!-- require that solver.exec is defined -->
+        <!-- https://stackoverflow.com/questions/18162739/how-do-i-check-if-a-environment-variable-exists-in-my-pom-xml -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>1.3.1</version>
+            <executions>
+                <execution>
+                    <id>ensure-solver.exec-file-exists</id>
+                    <goals>
+                        <goal>enforce</goal>
+                    </goals>
+                    <configuration>
+                        <rules>
+                            <requireFilesExist>
+                                <files>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <file>${solver.exec}</file>
+                                </files>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <message>solver.exec file "${solver.exec}" does not exist! Pass as maven argument -Dsolver.exec="file name"</message>
+                            </requireFilesExist>
+                        </rules>
+                        <fail>true</fail>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>ensure-path-to-z3-is-valid</id>
+                    <goals>
+                        <goal>enforce</goal>
+                    </goals>
+                    <configuration>
+                        <rules>
+                            <evaluateBeanshell>
+                                <!-- Make sure PATH_TO_Z3 points to the directory holding libz3java -->
+                                <!--suppress MavenModelInspection -->
+                                <condition>
+                                    String[] extensions = {".so", ".dylib"};
+                                    String baseName = "libz3java";
+                                    String directory = "${env.PATH_TO_Z3}";
+                                    boolean fileExists = false;
+                                    for(String ext : extensions) {
+                                        String z3JavaFileName = directory + "/" + baseName + ext;
+                                        java.io.File z3JavaFile = new java.io.File(z3JavaFileName);
+                                        if(!fileExists) {
+                                            System.out.println("Checking if " + z3JavaFileName + " exists");
+                                        }
+                                        if(z3JavaFile.exists()) {
+                                            fileExists = true;
+                                        }
+                                    }
+                                    fileExists
+                                </condition>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <message>
+                                    file "${PATH_TO_Z3}/libz3java.(so,dylib)" does not exist! Make sure the environment variable PATH_TO_Z3 points to the directory holding either libz3java.dylib or libz3java.so
+                                </message>
+                            </evaluateBeanshell>
+                        </rules>
+                        <fail>true</fail>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        <!-- Run cortado on the classes -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+                <execution>
+                    <id>apply-cortado-to-jimple</id>
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <phase>compile</phase>
+                    <configuration>
+                        <executable>java</executable>
+                        <arguments>
+                            <argument>${suspend.cortado.for.debug.client}</argument>
+                            <argument>${enable.assertions}</argument>
+                            <argument>${fork.join.pool.limit.arg}</argument>
+                            <argument>-Xss1G</argument>
+                            <!-- connect via JMX for visualvm -->
+                            <argument>${jmx.remote.port}</argument>
+                            <argument>${jmx.ssl}</argument>
+                            <argument>${jmx.authenticate}</argument>
+                            <!-- logging -->
+                            <argument>-Dorg.slf4j.simpleLogger.defaultLogLevel=${log.level}</argument>
+                            <!-- link to z3 -->
+                            <!--suppress MavenModelInspection -->
+                            <argument>-Djava.library.path=${env.PATH_TO_Z3}</argument>
+                            <!-- pass forward solver.exec argument -->
+                            <!--suppress UnresolvedMavenProperty -->
+                            <argument>-Dsolver.exec=${solver.exec}</argument>
+                            <!-- run jar on monitors -->
+                            <argument>-jar</argument>
+                            <argument>../../cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar</argument>
+                            <argument>all-example-monitors.txt</argument>
+                            <!-- perform flip-pred sig opt? -->
+                            <argument>--flip-pred-sig-opt</argument>
+                            <argument>always</argument>
+                            <!-- provide directories for ignore-lists and models -->
+                            <argument>--ignoredir</argument>
+                            <argument>../../ignore-lists/</argument>
+                            <argument>--modelsdir</argument>
+                            <argument>../../models/</argument>
+                            <!-- provide expected jimple output -->
+                            <argument>--expectedjimpledir</argument>
+                            <argument>${project.basedir}/../../resources/expected-jimple</argument>
+                            <!-- make dot files if requested -->
+                            <argument>${dot.files.option}</argument>
+                            <argument>${dot.files.directory}</argument>
+                            <!-- enumerate lockings? -->
+                            <argument>${enumerate.locks.arg}</argument>
+                            <argument>${enumerate.locks.timeout}</argument>
+                            <argument>${enumerate.locks.timeout.units}</argument>
+                            <argument>${enumerate.locks.dir.arg}</argument>
+                            <argument>${enumerate.locks.dir}</argument>
+                            <!-- fragment options -->
+                            <argument>--fragmentweights</argument>
+                            <argument>${fragment.weights}</argument>
+                            <argument>--fragmentconstructor</argument>
+                            <argument>${fragment.constructor}</argument>
+                            <!-- begin soot options -->
+                            <argument>--</argument>
+                            <!-- output directory -->
+                            <argument>-d</argument>
+                            <argument>target/jimple</argument>
+                            <!-- make jimple -->
+                            <argument>-f</argument>
+                            <argument>jimple</argument>
+                            <!-- automatically find java paths for soot -->
+                            <argument>-pp</argument>
+                            <!-- soot class path -->
+                            <argument>-cp</argument>
+                            <!-- automatically creates the classpath using all project dependencies,
+                                 also adding the project build directory -->
+                            <classpath/>:src/main/java
+                        </arguments>
+                    </configuration>
+                </execution>
+                <!-- Run soot to convert jimple to class files -->
+                <execution>
+                    <id>jimple-to-class</id>
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <phase>compile</phase>
+                    <configuration>
+                        <executable>java</executable>
+                        <arguments>
+                            <!-- logging -->
+                            <argument>-Dorg.slf4j.simpleLogger.defaultLogLevel=debug</argument>
+                            <!-- classpath -->
+                            <argument>-cp</argument>
+                            <argument>../../cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar</argument>
+                            <!-- run soot -->
+                            <argument>soot.Main</argument>
+                            <!-- java 8 -->
+                            <argument>-java-version</argument>
+                            <argument>8</argument>
+                            <!-- prefer jimple files in the class path -->
+                            <argument>-src-prec</argument>
+                            <argument>jimple</argument>
+                            <!-- soot class path -->
+                            <argument>-cp</argument>
+                            <!-- automatically creates the classpath using all project dependencies,
+                                 also adding the project build directory -->
+                            <classpath/>:src/main/java
+                            <!-- automatically find java paths for soot -->
+                            <argument>-pp</argument>
+                            <!-- process the jimple files -->
+                            <argument>-process-dir</argument>
+                            <argument>target/jimple</argument>
+                            <!-- output to classes -->
+                            <argument>-d</argument>
+                            <argument>target/classes</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
         <!-- Shade plugin: build all deps into one massive jar -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -133,56 +532,9 @@
                                     <exclude>module-info.class</exclude>
                                     <exclude>META-INF/**</exclude>
                                     <exclude>**/about.html</exclude>
-                                    <exclude>**/LICENSE</exclude>
-                                    <exclude>**/NOTICE</exclude>
-                                    <exclude>**/rootdoc.txt</exclude>
-                                </excludes>
-                            </filter>
-                            <filter>
-                                <artifact>org.slf4j:slf4j-log4j12</artifact>
-                                <excludes>
-                                    <exclude>org/slf4j/impl/StaticLoggerBinder*</exclude>
-                                    <exclude>org/slf4j/impl/StaticMDCBinder*</exclude>
-                                    <exclude>org/slf4j/impl/StaticMarkerBinder*</exclude>
-                                </excludes>
-                            </filter>
-                            <filter>
-                                <artifact>*:*spark*</artifact>
-                                <excludes>
-                                    <exclude>org/apache/spark/unused/UnusedStubClass*</exclude>
-                                </excludes>
-                            </filter>
-                            <filter>
-                                <artifact>tomcat:jasper-compiler</artifact>
-                                <excludes>
-                                    <exclude>org/apache/jasper/compiler/Localizer*</exclude>
-                                </excludes>
-                            </filter>
-                            <filter>
-                                <artifact>org.apache.hadoop:hadoop-yarn-api</artifact>
-                                <excludes>
-                                    <exclude>**/yarn-default.xml</exclude>
-                                </excludes>
-                            </filter>
-                            <filter>
-                                <artifact>org.fusesource.leveldbjni:leveldbjni-all</artifact>
-                                <excludes>
-                                    <exclude>org/fusesource/hawtjni/runtime/Callback*</exclude>
-                                    <exclude>org/fusesource/hawtjni/runtime/JNIEnv*</exclude>
-                                    <exclude>org/fusesource/hawtjni/runtime/Library*</exclude>
-                                    <exclude>org/fusesource/hawtjni/runtime/PointerMath*</exclude>
                                 </excludes>
                             </filter>
                         </filters>
-                        <artifactSet>
-                            <excludes>
-                                <exclude>io.netty:netty-all:jar:</exclude>
-                                <exclude>com.google.code.findbugs:annotations:jar:</exclude>
-                                <exclude>javax.servlet:jsp-api:jar:</exclude>
-                                <exclude>javax.servlet:servlet-api:jar:</exclude>
-                                <exclude>commons-logging:commons-logging:jar:</exclude>
-                            </excludes>
-                        </artifactSet>
                     </configuration>
                 </execution>
             </executions>
