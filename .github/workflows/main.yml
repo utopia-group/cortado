@@ -85,4 +85,4 @@ jobs:
         run: |   # MUST set LD_LIBRARY_PATH for this to work on ubuntu. Also set PATH_TO_Z3 as requested by cortado-example-monitor-impls
           export LD_LIBRARY_PATH=${{ env.Z3_PATH }}
           export PATH_TO_Z3=${{ env.Z3_PATH }}
-          mvn -B install -Dsolver.exec=${PATH_TO_Z3}/z3 --file cortado-benchmarks -Dmaven.exec.skip=true
+          mvn -B install -Dsolver.exec=${PATH_TO_Z3}/z3 --file cortado-benchmarks -Dexec.skip
