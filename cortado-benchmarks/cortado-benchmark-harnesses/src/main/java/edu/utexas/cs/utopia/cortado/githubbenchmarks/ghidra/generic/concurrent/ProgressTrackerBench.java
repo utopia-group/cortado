@@ -17,8 +17,6 @@ public class ProgressTrackerBench
             "Ablated",
             "Implicit",
             "ExplicitCoarseOriginal",
-//            "ExplicitFine",
-//            "ExplicitFineAtomicOpt"
     })
     String whichImplementation;
     ProgressTrackerInterface monitor;
@@ -29,12 +27,6 @@ public class ProgressTrackerBench
         {
             case "ExplicitCoarseOriginal":
                 monitor = new ProgressTracker();
-                break;
-            case "ExplicitFine":
-                monitor = new ProgressTrackerFineGrainedLocking();
-                break;
-            case "ExplicitFineAtomicOpt":
-                monitor = new ProgressTrackerFineGrainedLockingACount();
                 break;
             case "Implicit":
                 monitor = new ImplicitProgressTracker();

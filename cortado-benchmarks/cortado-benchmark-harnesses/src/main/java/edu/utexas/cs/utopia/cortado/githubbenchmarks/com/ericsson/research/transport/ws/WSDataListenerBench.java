@@ -17,8 +17,6 @@ public class WSDataListenerBench {
             "Ablated",
             "Implicit",
             "ExplicitCoarseOriginal",
-//            "ExplicitCoarse",
-//            "ExplicitFine"
     })
     private String whichImplementation;
 
@@ -44,12 +42,6 @@ public class WSDataListenerBench {
         switch(this.whichImplementation) {
             case "ExplicitCoarseOriginal":
                 this.wsListener = new WSDataListener();
-                break;
-            case "ExplicitCoarse":
-                this.wsListener = new CortadoExplicitCoarseGrainedWSDataListener();
-                break;
-            case "ExplicitFine":
-                this.wsListener = new CortadoExplicitFineGrainedWSDataListener();
                 break;
             case "Implicit":
                 this.wsListener = new ImplicitWSDataListener();

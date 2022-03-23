@@ -14,7 +14,6 @@ public class ConcurrencyThrottleSupportBench
             "ExplicitOriginalCoarseSignalOpt",
             "Expresso",
             "Ablated",
-//            "ExplicitCoarseSignalOptAtomicOpt"
     })
     String whichImplementation;
     ConcurrencyThrottleSupportInterface concurrencyThrottleSupport;
@@ -45,9 +44,6 @@ public class ConcurrencyThrottleSupportBench
                 break;
             case "Ablated":
                 this.concurrencyThrottleSupport = new ImplicitConcurrencyThrottleSupportAblated(threadLimit);
-                break;
-            case "ExplicitCoarseSignalOptAtomicOpt":
-                this.concurrencyThrottleSupport = new ExplicitAtomicConcurrencyThrottleSupport(threadLimit);
                 break;
             default:
                 throw new IllegalStateException("Unrecognized value for whichDisconnectableInputStream");
