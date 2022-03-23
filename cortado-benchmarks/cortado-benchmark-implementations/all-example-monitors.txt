@@ -1,0 +1,10 @@
+edu.utexas.cs.utopia.cortado.githubbenchmarks.alluxio.worker.job.task.ImplicitPausableThreadPoolExecutor
+edu.utexas.cs.utopia.cortado.githubbenchmarks.com.ericsson.research.transport.ws.ImplicitWSDataListener
+edu.utexas.cs.utopia.cortado.githubbenchmarks.ghidra.generic.concurrent.ImplicitProgressTracker
+edu.utexas.cs.utopia.cortado.githubbenchmarks.io.realm.internal.async.ImplicitRealmThreadPoolExecutor
+edu.utexas.cs.utopia.cortado.githubbenchmarks.org.apache.hive.spark.client.ImplicitJobWrapper
+edu.utexas.cs.utopia.cortado.githubbenchmarks.org.apache.kafka.trogdor.workload.ImplicitRoundTripWorker
+edu.utexas.cs.utopia.cortado.githubbenchmarks.org.springframework.util.ImplicitConcurrencyThrottleSupport
+edu.utexas.cs.utopia.cortado.githubbenchmarks.us.codecraft.webmagic.thread.ImplicitCountableThreadPool
+edu.utexas.cs.utopia.cortado.githubbenchmarks.java.util.concurrent.ImplicitArrayBlockingQueue
+edu.utexas.cs.utopia.cortado.githubbenchmarks.org.apache.hadoop.metrics2.impl.ImplicitSinkQueue
