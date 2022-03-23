@@ -18,11 +18,6 @@
         <suspend.cortado.for.debug.client/>
         <dot.files.option/>
         <dot.files.directory/>
-        <enumerate.locks.arg/>
-        <enumerate.locks.timeout/>
-        <enumerate.locks.timeout.units/>
-        <enumerate.locks.dir.arg/>
-        <enumerate.locks.dir/>
         <jmx.remote.port/>
         <jmx.ssl/>
         <jmx.authenticate/>
@@ -113,25 +108,6 @@
                 <dot.files.directory>
                     target/dotFiles
                 </dot.files.directory>
-            </properties>
-        </profile>
-        <!-- enumerate lockings -->
-        <profile>
-            <id>enumerate.lockings</id>
-            <!-- Activate if maven property make.dot is defined true -->
-            <activation>
-                <property>
-                    <name>enumerate.lockings</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <properties>
-                <!-- count solutions with a per-sol timeout of 10s and max-solve of 1,000 -->
-                <enumerate.locks.arg>--countlockings</enumerate.locks.arg>
-                <enumerate.locks.timeout>30</enumerate.locks.timeout>
-                <enumerate.locks.timeout.units>s</enumerate.locks.timeout.units>
-                <enumerate.locks.dir.arg>--writeenumeratedlockings</enumerate.locks.dir.arg>
-                <enumerate.locks.dir>target/enumerated-jimple</enumerate.locks.dir>
             </properties>
         </profile>
         <!-- Make dot files if this profile is activated -->
@@ -437,18 +413,9 @@
                             <argument>../../ignore-lists/</argument>
                             <argument>--modelsdir</argument>
                             <argument>../../models/</argument>
-                            <!-- provide expected jimple output -->
-                            <argument>--expectedjimpledir</argument>
-                            <argument>${project.basedir}/../../resources/expected-jimple</argument>
                             <!-- make dot files if requested -->
                             <argument>${dot.files.option}</argument>
                             <argument>${dot.files.directory}</argument>
-                            <!-- enumerate lockings? -->
-                            <argument>${enumerate.locks.arg}</argument>
-                            <argument>${enumerate.locks.timeout}</argument>
-                            <argument>${enumerate.locks.timeout.units}</argument>
-                            <argument>${enumerate.locks.dir.arg}</argument>
-                            <argument>${enumerate.locks.dir}</argument>
                             <!-- fragment options -->
                             <argument>--fragmentweights</argument>
                             <argument>${fragment.weights}</argument>
@@ -486,7 +453,7 @@
                             <argument>-Dorg.slf4j.simpleLogger.defaultLogLevel=debug</argument>
                             <!-- classpath -->
                             <argument>-cp</argument>
-                            <argument>../../cortado-core/cortado/target/cortado-0.0.1-SNAPSHOT.jar</argument>
+                            <argument>../../cortado-core/cortado/target/cortado-0.1.0.jar</argument>
                             <!-- run soot -->
                             <argument>soot.Main</argument>
                             <!-- java 8 -->
