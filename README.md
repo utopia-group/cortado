@@ -1,6 +1,6 @@
 # cortado
 
-Tool from our 2022 OOPSLA paper [Synthesizing Fine-Grained Synchronization Protocols for Implicit Monitors](todo)
+Tool from our 2022 OOPSLA paper [Synthesizing Fine-Grained Synchronization Protocols for Implicit Monitors](https://kferles.github.io/assets/pdf/OOPSLA-22.pdf)
 
 ## Tool
 
