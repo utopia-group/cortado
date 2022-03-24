@@ -77,7 +77,7 @@ Benchmarks used for our 2022 OOPSLA submission.
 
 To compile them, please follow the following instructions.
 
-### Compiling benchmarks
+### Compiling benchmarks and harnesses
 
 After installing cortado, you can compile the benchmarks and run
 the cortado algorithm on them using the following command:
@@ -94,8 +94,18 @@ mvn clean install -f cortado-benchmarks -Dexec.skip=true
 ```
 
 Note that you still must install cortado first due to a dependency on
-the `@Atomic` annotations.
+the [`@Atomic` annotations](https://github.com/utopia-group/cortado/blob/main/cortado-core/cortado-mockclasses/src/main/java/edu/utexas/cs/utopia/cortado/mockclasses/Atomic.java).
 
-TODO: add commands for compiling harnesses and run benchmarks.
+### Running benchmarks
 
-TODO: Add link to `@Atomic`
+To run all benhcmarks invoke script [run-all-benchmarks.sh](https://github.com/utopia-group/cortado/blob/main/cortado-benchmarks/cortado-benchmark-harnesses/run-all-benchmakrs.sh) from its enclosing directory.
+
+### Running ablation studies
+
+You can run the ablation sudies we performed in our paper by running the following commands within the `cortado-benchmarks/scripts` directory.
+
+```bash
+./build-all-ablations.sh
+./run-all-ablations.sh
+```
+
