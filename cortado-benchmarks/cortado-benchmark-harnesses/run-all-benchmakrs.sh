@@ -61,7 +61,7 @@ DEFAULT_JVM_PARAMS="";
 declare -A BENCH_JVM_PARAMS=(
                         )
 # path to example monitors jar
-EXAMPLE_MONITORS_JAR=$(realpath ../cortado-example-monitor-impls/target/cortado-example-monitor-impls-0.0.1-SNAPSHOT.jar)
+EXAMPLE_MONITORS_JAR=$(realpath ../cortado-benchmark-implementations/target/ccortado-benchmark-implementations-0.1.0.jar)
 if [ ! -f "${EXAMPLE_MONITORS_JAR}" ]; then
     echo "Example monitors file does not exist: ${EXAMPLE_MONITORS_JAR}"
     exit 1
